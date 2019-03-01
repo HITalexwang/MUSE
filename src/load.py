@@ -579,6 +579,9 @@ def load_aligns(file, examples=None, n_max_sent=None, align_punc=False, policy='
                     toks_a = examples[len(aligns)].toks_a
                     toks_b = examples[len(aligns)].toks_b
                     for pair in align:
+                        if int(pair[0])+1 >= len(toks_a) or int(pair[1])+1 >= len(toks_b):
+                            continue
+                            raise ValueError("Mismatch :\ntoks0:{}\ntoks1:{}\npair:{}".format(' '.join(toks_a), ' '.join(toks_b), str(pair[0])+'-'+str(pair[1])))
                         if (toks_a[int(pair[0])+1] in puncs and toks_b[int(pair[1])+1] not in puncs) or (
                             toks_a[int(pair[0])+1] not in puncs and toks_b[int(pair[1])+1] in puncs):
                             #print (len(aligns), pair[0], pair[1], toks_a[int(pair[0])+1], toks_b[int(pair[1])+1])
@@ -658,7 +661,7 @@ def load(vocab_file, input_file, batch_size=32, do_lower_case=True,
     return dataset, unique_id_to_feature, features
 
 def load_from_bert(vocab_file, input_file_a, input_file_b, do_lower_case=True, 
-            max_seq_length=128, vocab_file1=None, align_file=None, n_max_sent=None,
+            max_seq_length=256, vocab_file1=None, align_file=None, n_max_sent=None,
             align_punc=False, policy='1to1'):
 
     tokenizer = tokenization.FullTokenizer(
@@ -909,7 +912,7 @@ def convert_bert_examples_to_features_single(examples, seq_length, sents):
 def load_from_single_bert(bert_file, sents, max_seq_length=128):
 
     examples = load_single_bert(bert_file)
-    assert len(sents) == len(examples)
+    #assert len(sents) == len(examples)
     
     features = convert_bert_examples_to_features_single(examples, max_seq_length, sents)
 
